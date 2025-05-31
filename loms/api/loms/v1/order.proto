@@ -1,0 +1,24 @@
+syntax = "proto3";
+package order;
+
+option go_package = "route256/loms/pkg/api/loms/v1";
+
+message Order {
+  int64 id = 1;
+  int64 user_id = 2;
+  OrderStatus status = 3;
+  repeated Item items = 4;
+};
+
+message Item {
+  int64 sku_id = 1;
+  uint32 count = 2;
+}
+
+enum OrderStatus {
+  NEW = 0;
+  AWAITING_PAYMENT = 1;
+  FAILED = 2;
+  PAYED = 3;
+  CANCELLED = 4;
+}

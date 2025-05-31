@@ -1,0 +1,185 @@
+### create normal order
+POST http://localhost:8084/api.Loms/CreateOrder
+Content-Type: application/json
+
+{
+  "userId": 31337,
+  "items": [
+    {
+      "skuId": 1076963,
+      "count": 3
+    }
+  ]
+}
+### expected {"orderID":6}
+
+
+### get info, assert status="awaiting payment"
+POST http://localhost:8084/api.Loms/OrderInfo
+Content-Type: application/json
+
+{
+  "orderId": 6
+}
+### expected {"status":"awaiting payment","user":31337,"Items":[{"skuId":4487693,"count":3},{"skuId":4669069,"count":2}]}
+
+
+### pay order
+POST http://localhost:8084/api.Loms/PayOrder
+Content-Type: application/json
+
+{
+  "orderId": 6
+}
+### expected {}
+
+
+### check actual status is "payed"
+POST http://localhost:8084/api.Loms/OrderInfo
+Content-Type: application/json
+
+{
+  "orderId": 6
+}
+### expected {"status":"payed","user":31337,"Items":[{"skuId":1076963,"count":3}]}
+
+
+### unable to cancel payed order
+POST http://localhost:8084/api.Loms/CancelOrder
+Content-Type: application/json
+
+{
+  "orderId": 6
+}
+### expected order/cancel: command handler failed: unexpected order status, actual="payed": order wrong status; 412 (Precondition Failed)
+
+
+### get unknown order
+POST http://localhost:8084/api.Loms/OrderInfo
+Content-Type: application/json
+
+{
+  "orderId": 404
+}
+### expected order/info: command handler failed: order not found; 404 (Not Found)
+
+
+### cancel order not exists
+POST http://localhost:8084/api.Loms/CancelOrder
+Content-Type: application/json
+
+{
+  "orderId": 404
+}
+### expected order/cancel: command handler failed: order not found; 404 (Not Found)
+
+
+### create order stocks not enought
+POST http://localhost:8084/api.Loms/CreateOrder
+Content-Type: application/json
+
+{
+  "userId": 31337,
+  "items": [
+    {
+      "skuId": 2956315,
+      "count": 400
+    }
+  ]
+}
+### expected: api.Loms/CreateOrder: command handler failed: stock not enough; 412 (Precondition Failed)
+
+
+### check order status is failed
+POST http://localhost:8084/api.Loms/OrderInfo
+Content-Type: application/json
+
+{
+  "orderId": 6
+}
+### expected: {"status":"failed","user":3,"Items":[{"skuId":1148162,"count":10}]}
+
+### pay failed order
+POST http://localhost:8084/api.Loms/PayOrder
+Content-Type: application/json
+
+{
+  "orderId": 7
+}
+### expected order/cancel: command handler failed: unexpected order status, actual="failed": order wrong status; 412 (Precondition Failed)
+
+
+### stock info for normal skuId
+POST http://localhost:8084/api.Loms/StocksInfo
+Content-Type: application/json
+
+{
+  "sku": 1625903
+}
+### expected {"count":1000}
+
+
+### stock info for unknown skuId
+POST http://localhost:8084/api.Loms/StocksInfo
+Content-Type: application/json
+
+{
+  "sku": 404
+}
+### expected {}; 200 OK
+
+
+### reserve 500 count of the stock
+POST http://localhost:8084/api.Loms/CreateOrder
+Content-Type: application/json
+
+{
+  "userId": 31337,
+  "items": [
+    {
+      "skuId": 139275865,
+      "count": 500
+    }
+  ]
+}
+### expected: {"orderId":3}
+
+
+### check actual stocks
+POST http://localhost:8084/api.Loms/StocksInfo
+Content-Type: application/json
+
+{
+  "sku": 139275865
+}
+### expected {"count":65034}; 200 OK
+
+
+### cancel order
+POST http://localhost:8084/api.Loms/CancelOrder
+Content-Type: application/json
+
+{
+  "orderId": 8
+}
+### expected 200 OK
+
+
+### check canceled order status
+POST http://localhost:8084/api.Loms/OrderInfo
+Content-Type: application/json
+
+{
+  "orderId": 8
+}
+### expected {"status":"cancelled","user":31337,"Items":[{"skuId":139275865,"count":500}]}
+
+
+### check stocks returns
+POST http://localhost:8084/api.Loms/StocksInfo
+Content-Type: application/json
+
+{
+  "sku": 139275865
+}
+### expected {"count":1000}; 200 OK

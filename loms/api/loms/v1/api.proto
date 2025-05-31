@@ -1,0 +1,61 @@
+syntax = "proto3";
+package api;
+
+option go_package = "route256/loms/pkg/api/loms/v1";
+
+import "order.proto";
+
+service Loms {
+  rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
+  rpc OrderInfo (OrderInfoRequest) returns (OrderInfoResponse);
+  rpc PayOrder (PayOrderRequest) returns (PayOrderResponse);
+  rpc CancelOrder (CancelOrderRequest) returns (CancelOrderResponse);
+  rpc StocksInfo (StocksInfoRequest) returns (StocksInfoResponse);
+}
+
+// CreateOrder
+
+message CreateOrderRequest {
+  int64 user_id = 1;
+  repeated order.Item items = 2;
+}
+
+message CreateOrderResponse {
+  int64 order_id = 1;
+}
+
+// OrderInfo
+
+message OrderInfoRequest {
+  int64 order_id = 1;
+}
+
+message OrderInfoResponse {
+  order.Order order = 1;
+}
+
+// PayOrder
+
+message PayOrderRequest {
+  int64 order_id = 1;
+}
+
+message PayOrderResponse {}
+
+// CancelOrder
+
+message CancelOrderRequest {
+  int64 order_id = 1;
+}
+
+message CancelOrderResponse {}
+
+// StocksInfo
+
+message StocksInfoRequest {
+  int64 sku = 1;
+}
+
+message StocksInfoResponse {
+  uint32 count = 1;
+}
